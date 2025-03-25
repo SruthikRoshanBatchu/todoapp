@@ -1,25 +1,22 @@
-FROM python:3.9-alpine
+FROM python:3.12
 
-# Install necessary build dependencies (gcc, musl-dev, libffi-dev)
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev
+WORKDIR ~/todoapp
 
-# Set the working directory in the container
-WORKDIR /app
+COPY . .
 
-# Copy the requirements file into the container
-COPY requirements.txt /app/
+RUN apt update && apt install -y pkg-config libdbus-1-dev python3-dev
 
-# List the contents of the /app directory to verify the file is there
-RUN ls -l /app
+RUN pip install --upgrade pip
+RUN pip install gunicorn
+RUN pip install django
+RUN pip install -r requirements.txt
+RUN apt install sqlite3
 
-# Install virtualenv and dependencies from the requirements file
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Clean up build dependencies after installing packages
-RUN apk del .build-deps
-
-# Expose the port the app will run on
 EXPOSE 8096
 
-# Start the Django application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8096"]
+CMD ["python3 manage.py makemigrations"]
+
+CMD ["python3 manage.py migrate"]
+
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8091", "todoApp.wsgi:application"]
+
