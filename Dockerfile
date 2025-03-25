@@ -12,7 +12,7 @@ RUN pip install django
 RUN pip install -r requirements.txt
 RUN apt install sqlite3
 
-EXPOSE 8096
+EXPOSE 8088
 
 CMD ["python3 manage.py makemigrations"]
 
